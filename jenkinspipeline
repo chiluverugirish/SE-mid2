@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'MAVEN_HOME'
+    }
+    
+    stages {
+        stage('git repo & clean') {
+            steps {
+                // Remove directory if exists
+                bat "rmdir /s /q Virtual-Event-Management-Application"
+                // Clone the repository
+                bat "git clone https://github.com/chiluverugirish/SE-mid2.git Virtual-Event-Management-Application"
+                // Clean the project
+                bat "mvn clean -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('install') {
+            steps {
+                bat "mvn install -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('test') {
+            steps {
+                bat "mvn test -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('package') {
+            steps {
+                bat "mvn package -f Virtual-Event-Management-Application"
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Build completed successfully!'
+            archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
+        }
+        failure {
+            echo 'Build failed. Please check the console output.'
+        }
+    }
+}
