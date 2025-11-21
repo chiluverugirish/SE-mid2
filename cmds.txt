@@ -1,0 +1,43 @@
+------------------- Kubernetes + Minikube Commands -------------------
+
+minikube start --driver=docker
+# Starts Minikube Kubernetes cluster using Docker engine
+
+minikube status
+# Shows current status of Minikube components
+
+minikube stop
+# Stops the running Kubernetes cluster
+
+kubectl create deployment mynginx --image=nginx
+# Creates a deployment named 'mynginx' using nginx container image
+
+kubectl get deployments
+# Lists all active deployments
+
+kubectl expose deployment mynginx --type=NodePort --port=80 --target-port=80
+# Exposes deployment on a NodePort so it is accessible externally
+
+kubectl get svc mynginx
+# Displays service port and NodePort mapping
+
+kubectl scale deployment mynginx --replicas=4
+# Scales Kubernetes deployment to 4 pods
+
+kubectl port-forward svc/mynginx 8081:80
+# Forwards local port 8081 to service port 80 for browser access
+
+kubectl delete deployment mynginx
+# Deletes deployment and its pods
+
+kubectl delete service mynginx
+# Deletes exposed service
+
+
+------------------- Docker Commands -------------------
+
+docker pull jasonrivers/nagios:latest
+# Pulls Nagios monitoring tool container image
+
+docker run --name nagios-demo -p 8888:80 jasonrivers/nagios:latest
+# Runs container with name 'nagios-demo' mapping port 8888 to 80

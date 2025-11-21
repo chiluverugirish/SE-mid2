@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch to build')
+        choice(name: 'DEPLOY_METHOD', choices: ['MANAGER_API', 'LOCAL_COPY'], description: 'Select deployment method')
+    }
+
+    environment {
+        // Application / deployment specifics
+        APP_NAME          = 'virtual-event-management'
+        TOMCAT_HOST       = 'localhost'
+        TOMCAT_PORT       = '8080'
+        TOMCAT_MANAGER_URL = "http://${TOMCAT_HOST}:${TOMCAT_PORT}/manager/text"
+
+        // Local Tomcat webapps directory (adjust if different)
+        WEBAPPS_DIR       = '/opt/tomcat/webapps'
+
+        // Jenkins base URL (useful for notifications, links)
+        JENKINS_BASE      = 'http://localhost:8888'
+
+        MAVEN_OPTS        = '-Xms256m -Xmx512m'
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '25'))
+        ansiColor('xterm')
+        timestamps()
+    }
+
+    triggers {
+        // Enable if using SCM polling instead of GitHub webhook:
+        // pollSCM('H/15 * * * *')
+    }
+    
+    stages {
+        stage('git repo & clean') {
+            steps {
+                // Remove directory if exists
+                bat "rmdir /s /q Virtual-Event-Management-Application"
+                // Clone the repository
+                bat "git clone https://github.com/chiluverugirish/SE-mid2.git Virtual-Event-Management-Application"
+                // Clean the project
+                bat "mvn clean -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('install') {
+            steps {
+                bat "mvn install -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('test') {
+            steps {
+                bat "mvn test -f Virtual-Event-Management-Application"
+            }
+        }
+        
+        stage('package') {
+            steps {
+                bat "mvn package -f Virtual-Event-Management-Application"
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Build completed successfully!'
+            archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
+        }
+        failure {
+            echo 'Build failed. Please check the console output.'
+        }
+    }
+}
