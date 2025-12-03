@@ -6,17 +6,20 @@ pipeline {
     }
     
     stages {
+
         stage('git repo & clean') {
             steps {
-                // Remove directory if exists
-                bat "rmdir /s /q Virtual-Event-Management-Application"
-                // Clone the repository
+                // Safe delete (won't fail if folder doesn't exist)
+                bat "if exist Virtual-Event-Management-Application rmdir /s /q Virtual-Event-Management-Application"
+                
+                // Clone repo
                 bat "git clone https://github.com/chiluverugirish/SE-mid2.git Virtual-Event-Management-Application"
-                // Clean the project
+                
+                // Clean project
                 bat "mvn clean -f Virtual-Event-Management-Application"
             }
         }
-        
+
         stage('install') {
             steps {
                 bat "mvn install -f Virtual-Event-Management-Application"
